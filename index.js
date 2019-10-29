@@ -23,8 +23,11 @@ const generateItemElement = function (item) {
         <button class='shopping-item-toggle js-item-toggle'>
           <span class='button-label'>check</span>
         </button>
-        <button class='shopping-item-delete js-item-delete'>
+        <button class='shopping-item-delete js-item-delete' id='item-delete'>
           <span class='button-label'>delete</span>
+        </button>
+        <button class='shopping-item-edit js-item-edit'>
+          <span class='button-label' id='item-edit'>edit item</span>
         </button>
       </div>
     </li>`;
@@ -127,6 +130,26 @@ const handleDeleteItemClicked = function () {
   });
 };
 
+const editItem = function () {
+
+}
+
+const attachEditItemClick = function () {
+  $('#item-edit').click(function () {
+    $('.shopping-item').html(`<div id='edit-item-container'><input type="text" name="shopping-list-edit" id='shopping-list-edit' placeholder="edit..">
+    <button type="submit" id='edit-submit-button'>submit</button></div>`);
+    attachSubmitClick();
+  });
+
+};
+
+const attachSubmitClick = function () {
+  $('#edit-submit-button').click(function () {
+    let editInputValue = $('#shopping-list-edit').val();
+    store.items[0].name = editInputValue;
+    $('#edit-item-container').html(`<span class='shopping-item'>${editInputValue}</span>`)
+  })
+}
 /**
  * Toggles the store.hideCheckedItems property
  */
@@ -145,6 +168,8 @@ const handleToggleFilterClick = function () {
   });
 };
 
+
+
 /**
  * This function will be our callback when the
  * page loads. It is responsible for initially 
@@ -159,7 +184,10 @@ const handleShoppingList = function () {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
+  attachEditItemClick();
+  attachSubmitClick();
   handleToggleFilterClick();
+
 };
 
 // when the page loads, call `handleShoppingList`
