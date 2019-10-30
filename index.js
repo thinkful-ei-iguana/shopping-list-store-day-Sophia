@@ -15,6 +15,13 @@ const generateItemElement = function (item) {
      <span class='shopping-item'>${item.name}</span>
     `;
   }
+  if (item.editing){
+    itemTitle = 
+      `<div data-item-id='${item.id}' class="edit-item-container">
+          <input type="text" name="shopping-list-edit" class='shopping-list-edit' placeholder="edit..">
+          <button type="submit" class='edit-submit-button'>submit</button>
+      </div>`;
+  }
 
   return `
     <li class='js-item-element' data-item-id='${item.id}'>
@@ -23,8 +30,8 @@ const generateItemElement = function (item) {
         <button class='shopping-item-toggle js-item-toggle'>
           <span class='button-label'>check</span>
         </button>
-        <button class='shopping-item-delete js-item-delete' id='item-delete'>
-          <span class='button-label'>delete</span>
+        <button class='shopping-item-delete js-item-delete'>
+          <span class='button-label' >delete</span>
         </button>
         <button class='shopping-item-edit js-item-edit'>
           <span class='button-label' id='item-edit'>edit item</span>
@@ -92,6 +99,7 @@ const handleItemCheckClicked = function () {
   });
 };
 
+
 const getItemIdFromElement = function (item) {
   return $(item)
     .closest('.js-item-element')
@@ -130,26 +138,66 @@ const handleDeleteItemClicked = function () {
   });
 };
 
-const editItem = function () {
-
-}
-
-const attachEditItemClick = function () {
-  $('#item-edit').click(function () {
-    $('.shopping-item').html(`<div id='edit-item-container'><input type="text" name="shopping-list-edit" id='shopping-list-edit' placeholder="edit..">
-    <button type="submit" id='edit-submit-button'>submit</button></div>`);
-    attachSubmitClick();
-  });
-
+const editItem = function (id) {
+  const foundItem = store.items.find(item => item.id === id);
+  foundItem.editing = !foundItem.editing;
 };
 
-const attachSubmitClick = function () {
-  $('#edit-submit-button').click(function () {
-    let editInputValue = $('#shopping-list-edit').val();
-    store.items[0].name = editInputValue;
-    $('#edit-item-container').html(`<span class='shopping-item'>${editInputValue}</span>`)
-  })
+const handleEditItemClicked = function () {
+  $('.js-shopping-list').on('click', '.js-item-edit', event => {
+    const id = getItemIdFromElement(event.currentTarget);
+    editItem(id);
+    render();
+    handleSubmitClicked();
+  });
+};
+
+const getIdOnSubmit = function (item) {
+  return $(item)
+    .closest('.edit-item-container')
+    .data('item-id');
+};
+
+const getInputValue = function (item) {
+  return $(item)
+    .closest('.edit-item-container')
+    .find('.shopping-list-edit')
+    .val();
+};
+
+const assignItemName = function (newItem, id){
+  const foundItem = store.items.find(item => item.id === id);
+  foundItem.name = newItem;
+  foundItem.editing = false;
 }
+
+const handleSubmitClicked = function () {
+  $('.edit-item-container').on('click', '.edit-submit-button', event => {
+    const id = getIdOnSubmit(event.currentTarget);
+    const itemName = getInputValue(event.currentTarget);
+    assignItemName(itemName, id);
+    render();
+  });
+};
+
+
+
+// const attachEditItemClick = function () {
+//   $('#item-edit').click(function () {
+//     $('.shopping-item').html(`<div id='edit-item-container'><input type="text" name="shopping-list-edit" id='shopping-list-edit' placeholder="edit..">
+//     <button type="submit" id='edit-submit-button'>submit</button></div>`);
+//     attachSubmitClick();
+//   });
+
+// };
+
+// const attachSubmitClick = function () {
+//   $('#edit-submit-button').click(function () {
+//     let editInputValue = $('#shopping-list-edit').val();
+//     store.items[0].name = editInputValue;
+//     $('#edit-item-container').html(`<span class='shopping-item'>${editInputValue}</span>`)
+//   })
+// }
 /**
  * Toggles the store.hideCheckedItems property
  */
@@ -184,8 +232,7 @@ const handleShoppingList = function () {
   handleNewItemSubmit();
   handleItemCheckClicked();
   handleDeleteItemClicked();
-  attachEditItemClick();
-  attachSubmitClick();
+  handleEditItemClicked();
   handleToggleFilterClick();
 
 };
